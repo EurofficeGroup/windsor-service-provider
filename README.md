@@ -23,5 +23,5 @@ The work has been heavily inspired by https://github.com/volosoft/castle-windsor
 3. To match lifecycle your custom components to ASP.NET Core scope, use `LifeStyle.ScopedToNetCoreScope()`
 4. To access the container inject either `IWindsorContainer` or `IServiceProvider`
 
-## Licenses
+## License
 Apache 2.0

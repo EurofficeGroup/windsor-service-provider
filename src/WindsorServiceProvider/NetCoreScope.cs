@@ -38,7 +38,7 @@ namespace WindsorServiceProvider
         {
             _parent = parent;
             _scopeCache = new ScopeCache();
-			_onAfterCreated = emptyOnAfterCreated;
+            _onAfterCreated = emptyOnAfterCreated;
         }
         public static NetCoreScope BeginScope(NetCoreScope parent)
         {
@@ -61,11 +61,11 @@ namespace WindsorServiceProvider
         public Burden GetCachedInstance(ComponentModel model, ScopedInstanceActivationCallback createInstance)
         {
             var burden = _scopeCache[model];
-			if (burden == null)
-			{
-				_scopeCache[model] = burden = createInstance(_onAfterCreated);
-			}
-			return burden;
+            if (burden == null)
+            {
+                _scopeCache[model] = burden = createInstance(_onAfterCreated);
+            }
+            return burden;
         }
     }
 }
