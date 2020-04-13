@@ -24,10 +24,9 @@ namespace WindsorServiceProvider
 {
     internal class WindsorServiceProviderFactory : IServiceProviderFactory<IWindsorContainer>, IDisposable
     {
-        private NetCoreScope _rootScope;
         public WindsorServiceProviderFactory()
         {
-            _rootScope = NetCoreScope.BeginScope(null);
+            
         }
         public IWindsorContainer CreateBuilder(IServiceCollection services)
         {
@@ -42,11 +41,7 @@ namespace WindsorServiceProvider
 
         public void Dispose()
         {
-            if(_rootScope != null)
-            {
-                _rootScope.Dispose();
-                _rootScope = null;    
-            }
+            
         }
     }
 }
