@@ -27,22 +27,31 @@ namespace WindsorServiceProvider
     {
         private static readonly AsyncLocal<NetCoreScope> _current = new AsyncLocal<NetCoreScope>();
         public static NetCoreScope Current => _current.Value;
-
+        public static string NetCoreTransientMarker = "NetCoreTransient";
 
         private readonly NetCoreScope _parent;
         private static readonly Action<Burden> emptyOnAfterCreated = delegate { };
-		private readonly Action<Burden> _onAfterCreated;
 		private readonly IScopeCache _scopeCache;
+        public bool RootScope {get;private set;}
+        public int Nesting {get; private set;}
 
-        private NetCoreScope(NetCoreScope parent)
+        private NetCoreScope(NetCoreScope parent, bool rootScope)
         {
             _parent = parent;
             _scopeCache = new ScopeCache();
-            _onAfterCreated = emptyOnAfterCreated;
+            RootScope = rootScope;
+            Nesting = (parent?.Nesting ?? 0) + 1;
         }
         public static NetCoreScope BeginScope(NetCoreScope parent)
         {
-            var scope = new NetCoreScope(parent);
+            var scope = new NetCoreScope(parent, false);
+            _current.Value = scope;
+            return scope;
+        }
+
+        public static NetCoreScope BeginRootScope()
+        {
+            var scope = new NetCoreScope(null, true);
             _current.Value = scope;
             return scope;
         }
@@ -60,12 +69,34 @@ namespace WindsorServiceProvider
 
         public Burden GetCachedInstance(ComponentModel model, ScopedInstanceActivationCallback createInstance)
         {
-            var burden = _scopeCache[model];
-            if (burden == null)
-            {
-                _scopeCache[model] = burden = createInstance(_onAfterCreated);
+            if(model.Configuration.Attributes.Get(NetCoreTransientMarker) == Boolean.TrueString ){
+                var burder = createInstance(emptyOnAfterCreated);
+                _scopeCache[burder] = burder;
+                return burder;
             }
-            return burden;
+            else
+            {
+                var burden = _scopeCache[model];
+                if (burden == null)
+                {
+                    _scopeCache[model] = burden = createInstance(emptyOnAfterCreated);
+                }
+                return burden;
+            }
+        }
+
+        internal class ForcedScope : IDisposable
+        {
+            private readonly NetCoreScope _previousScope;
+            public ForcedScope(NetCoreScope scope)
+            {
+                _previousScope = NetCoreScope.Current;
+                NetCoreScope._current.Value = scope;
+            }
+            public void Dispose()
+            {
+                NetCoreScope._current.Value = _previousScope;
+            }
         }
     }
 }

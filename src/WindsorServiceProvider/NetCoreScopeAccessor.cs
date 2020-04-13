@@ -23,6 +23,10 @@ namespace WindsorServiceProvider
     {
         public ILifetimeScope GetScope(CreationContext context)
         {
+            if(NetCoreScope.Current == null)
+            {
+                NetCoreScope.BeginRootScope();
+            }
             return NetCoreScope.Current;
         }
 
