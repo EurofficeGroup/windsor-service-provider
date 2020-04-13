@@ -45,7 +45,11 @@ namespace WindsorServiceProvider
                     Component
                         .For<WindsorServiceProviderFactory>()
                         .Instance(factory)
-                        .LifestyleSingleton()
+                        .LifestyleSingleton(),
+                    Component
+                        .For<NetCoreScope>()
+                        .UsingFactoryMethod(() => NetCoreScope.Current)
+                        .LifestyleTransient()
             );
 
             //From https://github.com/volosoft/castle-windsor-ms-adapter/blob/master/src/Castle.Windsor.MsDependencyInjection/WindsorRegistrationHelper.cs
