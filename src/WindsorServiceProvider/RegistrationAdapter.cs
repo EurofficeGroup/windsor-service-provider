@@ -106,7 +106,9 @@ namespace WindsorServiceProvider
                 case ServiceLifetime.Scoped:
                     return registration.LifeStyle.ScopedToNetCoreScope();
                 case ServiceLifetime.Transient:
-                    return registration.LifeStyle.Transient;
+                    return registration
+                    .Attribute(NetCoreScope.NetCoreTransientMarker).Eq(Boolean.TrueString)
+                    .LifeStyle.ScopedToNetCoreScope();  //.NET core expects new instances but release on scope dispose
                 default:
                     throw new System.ArgumentException($"Invalid lifetime {service.Lifetime}");
             }
