@@ -22,23 +22,31 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace WindsorServiceProvider
 {
-    internal class WindsorScopedServiceProvider : IServiceProvider, ISupportRequiredService
+    internal class WindsorScopedServiceProvider : IServiceProvider, ISupportRequiredService, IDisposable
     {
         internal IWindsorContainer Container {get; private set;}
+        private readonly NetCoreScope _scope;
 
-        public WindsorScopedServiceProvider(IWindsorContainer container)
+        public WindsorScopedServiceProvider(IWindsorContainer container, NetCoreScope scope)
         {
             Container = container;
+            _scope = scope;
         }
 
         public object GetService(Type serviceType)
         {
-            return ResolveInstanceOrNull(serviceType, true);
+            using(var fs = new NetCoreScope.ForcedScope(_scope))
+            {
+                return ResolveInstanceOrNull(serviceType, true);    
+            }
         }
 
         public object GetRequiredService(Type serviceType)
         {
-            return ResolveInstanceOrNull(serviceType, false);
+            using(var fs = new NetCoreScope.ForcedScope(_scope))
+            {
+                return ResolveInstanceOrNull(serviceType, false);    
+            }
         }
 
         private object ResolveInstanceOrNull(Type serviceType, bool isOptional)
@@ -61,6 +69,19 @@ namespace WindsorServiceProvider
             }
 
             return Container.Resolve(serviceType);
+        }
+
+        public void Dispose()
+        {
+            if(_scope.RootScope)
+            {
+                var scope = _scope as IDisposable;
+                if(scope != null)
+                {
+                    scope.Dispose();
+                }
+                Container.Dispose();
+            }
         }
     }
 }
