@@ -15,28 +15,30 @@
  */
 
 using System;
-using Castle.Windsor;
-using Microsoft.Extensions.DependencyInjection;
+using Castle.MicroKernel.Context;
+using Castle.MicroKernel.Lifestyle.Scoped;
 
 namespace WindsorServiceProvider
 {
-    internal class WindsorScopeFactory : IServiceScopeFactory
+    internal class NetCoreRootScopeAccessor : IScopeAccessor
     {
-        private readonly IWindsorContainer _container;
-
-        public WindsorScopeFactory(
-            IWindsorContainer container)
+        public ILifetimeScope GetScope(CreationContext context)
         {
-            _container = container;
+            if(NetCoreScope.Current == null)
+            {
+                throw new InvalidOperationException("No scope");
+            }
+
+            if(NetCoreRootScope.Current.RootScope == null)
+            {
+                throw new InvalidOperationException("No root scope");
+            }
+
+            return NetCoreRootScope.Current.RootScope;     
         }
 
-        public IServiceScope CreateScope()
+        public void Dispose()
         {
-            var scope = NetCoreScope.BeginScope(NetCoreScope.Current);
-            //since WindsorServiceProvider is scoped, this gives us new instance
-            var provider = _container.Resolve<IServiceProvider>();
-
-            return new NetCoreServiceScope(scope, provider);
         }
     }
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System;
 using Castle.MicroKernel.Context;
 using Castle.MicroKernel.Lifestyle.Scoped;
 
@@ -25,7 +26,7 @@ namespace WindsorServiceProvider
         {
             if(NetCoreScope.Current == null)
             {
-                NetCoreScope.BeginRootScope();
+                throw new InvalidOperationException("No scope");
             }
             return NetCoreScope.Current;
         }

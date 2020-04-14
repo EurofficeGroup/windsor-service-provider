@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System;
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.Registration.Lifestyle;
 
@@ -28,6 +29,27 @@ namespace WindsorServiceProvider
         public static ComponentRegistration<TService> ScopedToNetCoreScope<TService>(this LifestyleGroup<TService> lifestyle) where TService : class
         {
             return lifestyle.Scoped<NetCoreScopeAccessor>();
+        }
+
+        /// <summary>
+        /// Returns new instances everytime it's resolved but disposes it on scope end
+        /// </summary>
+        /// <typeparam name="TService">Service type</typeparam>
+        public static ComponentRegistration<TService> LifestyleNetCoreTransient<TService>(this ComponentRegistration<TService> registration) where TService : class
+        {
+            return registration
+                .Attribute(NetCoreScope.NetCoreTransientMarker).Eq(Boolean.TrueString)
+                .LifeStyle.ScopedToNetCoreScope();  //.NET core expects new instances but release on scope dispose
+        }
+
+        /// <summary>
+        /// Singleton instance with .NET Core semantics
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        public static ComponentRegistration<TService> NetCoreStatic<TService>(this LifestyleGroup<TService> lifestyle) where TService : class
+        {
+            return lifestyle
+                .Scoped<NetCoreRootScopeAccessor>();
         }
     }
 }

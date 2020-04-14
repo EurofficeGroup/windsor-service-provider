@@ -36,6 +36,7 @@ namespace WindsorServiceProvider
 
         public IServiceProvider CreateServiceProvider(IWindsorContainer container)
         {
+            var rootScope = NetCoreRootScope.BeginRootScope();
             return container.Resolve<IServiceProvider>();
         }
 

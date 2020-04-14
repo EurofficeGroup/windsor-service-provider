@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-using System;
-using Castle.Windsor;
-using Microsoft.Extensions.DependencyInjection;
-
 namespace WindsorServiceProvider
 {
-    internal class WindsorScopeFactory : IServiceScopeFactory
+    internal class NetCoreRootScope : NetCoreScope
     {
-        private readonly IWindsorContainer _container;
-
-        public WindsorScopeFactory(
-            IWindsorContainer container)
+        private NetCoreRootScope() : base(null)
         {
-            _container = container;
+
+        }
+        public static NetCoreRootScope BeginRootScope()
+        {
+            var scope = new NetCoreRootScope();
+            _current.Value = scope;
+            return scope;
         }
 
-        public IServiceScope CreateScope()
-        {
-            var scope = NetCoreScope.BeginScope(NetCoreScope.Current);
-            //since WindsorServiceProvider is scoped, this gives us new instance
-            var provider = _container.Resolve<IServiceProvider>();
+        public override NetCoreRootScope RootScope => this;
+        public override int Nesting => 0;
 
-            return new NetCoreServiceScope(scope, provider);
-        }
     }
 }

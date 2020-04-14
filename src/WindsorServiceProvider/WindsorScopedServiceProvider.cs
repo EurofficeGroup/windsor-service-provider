@@ -27,10 +27,10 @@ namespace WindsorServiceProvider
         internal IWindsorContainer Container {get; private set;}
         private readonly NetCoreScope _scope;
 
-        public WindsorScopedServiceProvider(IWindsorContainer container, NetCoreScope scope)
+        public WindsorScopedServiceProvider(IWindsorContainer container)
         {
             Container = container;
-            _scope = scope;
+            _scope = NetCoreScope.Current;
         }
 
         public object GetService(Type serviceType)
@@ -70,17 +70,22 @@ namespace WindsorServiceProvider
 
             return Container.Resolve(serviceType);
         }
-
+        private bool _disposing = false;
         public void Dispose()
         {
-            if(_scope.RootScope)
+            if(_scope is NetCoreRootScope)
             {
-                var scope = _scope as IDisposable;
-                if(scope != null)
+                if(!_disposing)
                 {
-                    scope.Dispose();
+                    _disposing = true;
+                    var scope = _scope as IDisposable;
+                    if(scope != null)
+                    {
+                        scope.Dispose();
+                    }
+                    Container.Dispose();
                 }
-                Container.Dispose();
+                
             }
         }
     }

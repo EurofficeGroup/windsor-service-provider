@@ -102,13 +102,12 @@ namespace WindsorServiceProvider
             switch(service.Lifetime)
             {
                 case ServiceLifetime.Singleton:
-                    return registration.LifeStyle.Singleton;
+                    return registration.LifeStyle.NetCoreStatic();
                 case ServiceLifetime.Scoped:
                     return registration.LifeStyle.ScopedToNetCoreScope();
                 case ServiceLifetime.Transient:
-                    return registration
-                    .Attribute(NetCoreScope.NetCoreTransientMarker).Eq(Boolean.TrueString)
-                    .LifeStyle.ScopedToNetCoreScope();  //.NET core expects new instances but release on scope dispose
+                    return registration.LifestyleNetCoreTransient();
+                    
                 default:
                     throw new System.ArgumentException($"Invalid lifetime {service.Lifetime}");
             }
